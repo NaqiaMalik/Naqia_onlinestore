@@ -1,13 +1,14 @@
 import React, {useState, useEffect} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCustomerData, createNewCustomer,updateCustomer, deleteCustomer } from "../redux/Slices/FormSlices";
+import { fetchCustomerData, createNewCustomer, updateCustomerData, deleteCustomer } from "../redux/Slices/FormSlices";
 import moment from "moment";
  
 function Home() {
     const dispatch = useDispatch()
     const [display, setDisplay] = useState(false)
-    const [fields, setFields] = useState({ field1: "", field2: "", field3: "" });
-    const [data, setData] = useState([]);
+    const [full_name, setName] = useState("");
+    const [email, setEmail] = useState("");
+  
     const [dialogBox, setDialogBox] = useState("");
     const customerData = useSelector((state)=> {   
         JSON.stringify( state.Form?.data)
@@ -15,44 +16,34 @@ function Home() {
     });
 
     useEffect(() => {
+        // Fetch customer data when the component mounts
         dispatch(fetchCustomerData());
-    }, [dispatch]);
-    
-    useEffect(() => {
-        dispatch(createNewCustomer());
-    }, [dispatch]);
-
-    useEffect(() => {
-        dispatch(deleteCustomer());
-    }, [dispatch]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFields({
-            ...fields,
-            [name]: value,
-        });
-    };
+    }, [dispatch]);  
 
     const displayhandler = ()=>{
+        dispatch(fetchCustomerData())
         setDisplay(true)
     }
 
-    const createhandler = ()=>{
-        setData([...data, fields]);
+    const createhandler = (event) => {
+        event.preventDefault();
+        const newCustomer = { full_name, email };
+        dispatch(createNewCustomer(newCustomer));
         setDialogBox("Customer added successfully!")
-        setFields({ field1: "", field2: "", field3: "" });
-    }
-    const updatehandler = ()=>{
-        setData([...data, fields]);
+
+    };
+    const updatehandler = (event)=>{
+        event.preventDefault();
+        const updateCustomer = { full_name, email };
         setDialogBox("Customer updated successfully!")
-        setFields({ field1: "", field2: "", field3: "" });
+        dispatch(updateCustomerData(updateCustomer))
     }
     
-    const deletehandler = ()=>{
-        setData([...data, fields]);
+    const deletehandler = (event)=>{
+        event.preventDefault();
+        const deletecustomer = { full_name, email };
         setDialogBox("Customer deleted successfully!")
-        setFields({ field1: "", field2: "", field3: "" });
+        dispatch(deleteCustomer(deletecustomer))
     }
 
     return (
@@ -68,7 +59,7 @@ function Home() {
                             type="text"
                             id="input1"
                             className="w-full p-2 border border-gray-300 rounded-md"
-                            name="field1" value={fields.field1} onChange={handleChange}
+                            name="full_name" onChange={(event) => setName(event.target.value)}
                             
                         />
                     </div>
@@ -80,20 +71,9 @@ function Home() {
                             type="text"
                             id="input2"
                             className="w-full p-2 border border-gray-300 rounded-md"
-                            name="field2" value={fields.field2} onChange={handleChange}
-                        />
+                            name="email" onChange={(event) => setEmail(event.target.value)}/>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2" htmlFor="input3">
-                        Address
-                        </label>
-                        <input
-                            type="text"
-                            id="input3"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            name="field3" value={fields.field3} onChange={handleChange}
-                        />
-                    </div>
+                  
 
                     <div className="flex space-x-4">
                         <button
